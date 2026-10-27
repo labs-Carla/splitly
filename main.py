@@ -4,15 +4,16 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
 
 app = FastAPI(
     title="Splitly API",
-    description="Divide un gasto en COP entre varias personas.",
-    version="1.0.0",
+    description="Divide un gasto en COP entre varias personas, sin perder pesos por redondeo.",
+    version="2.0.0",
 )
 
 
@@ -25,7 +26,14 @@ class SolicitudDivision(BaseModel):
     monto: int = Field(gt=0, strict=True, description="Valor total del gasto en COP")
     personas: int = Field(ge=1, le=100, strict=True, description="Personas que comparten el gasto")
 
-    model_config = {"json_schema_extra": {"examples": [{"monto": 90000, "personas": 3}]}}
+    model_config = {"json_schema_extra": {"examples": [{"monto": 10000, "personas": 3}]}}
+
+
+class GrupoDePago(BaseModel):
+    """Un grupo de personas que paga el mismo valor."""
+
+    personas: int = Field(description="Cuántas personas pagan este valor")
+    monto: int = Field(description="Valor que paga cada una, en COP")
 
 
 class ResultadoDivision(BaseModel):
@@ -35,6 +43,36 @@ class ResultadoDivision(BaseModel):
     personas: int
     monto_base: int
     personas_con_extra: int
+    distribucion: list[GrupoDePago]
+
+
+class ErrorValidacion(BaseModel):
+    """Respuesta cuando los datos no son válidos."""
+
+    errores: list[str]
+
+
+# ---------- Regla de negocio ----------
+
+def calcular_division(monto: int, personas: int) -> ResultadoDivision:
+    # divmod devuelve (división entera, residuo). Ej: divmod(10000, 3) -> (3333, 1)
+    monto_base, personas_con_extra = divmod(monto, personas)
+
+    # El residuo siempre es menor que el número de personas, así que basta con
+    # que las primeras "personas_con_extra" paguen 1 peso más.
+    distribucion = []
+    if personas_con_extra > 0:
+        distribucion.append(GrupoDePago(personas=personas_con_extra, monto=monto_base + 1))
+    # Siempre queda al menos una persona sin extra, por la misma razón.
+    distribucion.append(GrupoDePago(personas=personas - personas_con_extra, monto=monto_base))
+
+    return ResultadoDivision(
+        total=monto,
+        personas=personas,
+        monto_base=monto_base,
+        personas_con_extra=personas_con_extra,
+        distribucion=distribucion,
+    )
 
 
 # ---------- Errores de validación en español ----------
@@ -58,31 +96,17 @@ async def manejar_error_validacion(request: Request, exc: RequestValidationError
 
 # ---------- API ----------
 
-@app.post("/api/dividir", response_model=ResultadoDivision)
+@app.post(
+    "/api/dividir",
+    response_model=ResultadoDivision,
+    responses={422: {"model": ErrorValidacion, "description": "Datos inválidos"}},
+)
 def dividir_gasto(solicitud: SolicitudDivision) -> ResultadoDivision:
-    # divmod devuelve (división entera, residuo). Ej: divmod(100000, 3) -> (33333, 1)
-    monto_base, personas_con_extra = divmod(solicitud.monto, solicitud.personas)
-    return ResultadoDivision(
-        total=solicitud.monto,
-        personas=solicitud.personas,
-        monto_base=monto_base,
-        personas_con_extra=personas_con_extra,
-    )
+    return calcular_division(solicitud.monto, solicitud.personas)
 
 
 # ---------- Frontend ----------
-# Se sirven solo estos tres archivos, para no exponer main.py ni otros archivos de la carpeta.
+# Se monta al final para que /api/dividir y /docs tengan prioridad.
+# Solo se publica la carpeta frontend/, así que main.py no se puede descargar.
 
-@app.get("/", include_in_schema=False)
-def pagina_principal() -> FileResponse:
-    return FileResponse(BASE_DIR / "index.html")
-
-
-@app.get("/style.css", include_in_schema=False)
-def hoja_de_estilos() -> FileResponse:
-    return FileResponse(BASE_DIR / "style.css")
-
-
-@app.get("/script.js", include_in_schema=False)
-def script_frontend() -> FileResponse:
-    return FileResponse(BASE_DIR / "script.js")
+app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
