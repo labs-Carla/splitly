@@ -135,9 +135,11 @@ function posicionTrasDigitos(texto, cantidad) {
   return texto.length;
 }
 
-// Mientras se escribe en #monto: "90000" -> "90.000", sin mover el cursor
-function formatearMientrasEscribe() {
-  const texto = campoMonto.value;
+// Mientras se escribe un monto: "90000" -> "90.000", sin mover el cursor.
+// Sirve para #monto y para el monto del asistente paso a paso.
+function formatearMientrasEscribe(evento) {
+  const campo = evento.target;
+  const texto = campo.value;
   const digitos = texto.replace(/[.\s]/g, "");
 
   // Si hay letras, comas, signo menos, etc., no se toca: el backend lo rechaza
@@ -145,13 +147,13 @@ function formatearMientrasEscribe() {
     return;
   }
 
-  const digitosAntesDelCursor = contarDigitos(texto.slice(0, campoMonto.selectionStart));
+  const digitosAntesDelCursor = contarDigitos(texto.slice(0, campo.selectionStart));
   const conPuntos = Number(digitos).toLocaleString("es-CO");
 
   if (conPuntos !== texto) {
-    campoMonto.value = conPuntos;
+    campo.value = conPuntos;
     const posicion = posicionTrasDigitos(conPuntos, digitosAntesDelCursor);
-    campoMonto.setSelectionRange(posicion, posicion);
+    campo.setSelectionRange(posicion, posicion);
   }
 }
 
@@ -176,14 +178,15 @@ function prepararValor(texto) {
 }
 
 // ---------- Errores ----------
-function mostrarError(mensajes) {
+// "caja" permite que el asistente paso a paso muestre los errores en su propia alerta
+function mostrarError(mensajes, caja = cajaError) {
   const parrafos = mensajes.map((mensaje) => {
     const parrafo = document.createElement("p");
     parrafo.textContent = mensaje;
     return parrafo;
   });
-  cajaError.replaceChildren(...parrafos);
-  cajaError.hidden = false;
+  caja.replaceChildren(...parrafos);
+  caja.hidden = false;
 
   // Se oculta el resultado viejo: ya no corresponde a lo que hay en el formulario
   resultado.hidden = true;
@@ -217,7 +220,9 @@ function crearItemDistribucion(grupo, montoBase) {
 
   const personas = document.createElement("span");
   personas.className = "distribucion__personas";
-  personas.textContent = `${grupo.personas} ${plural(grupo.personas, "persona paga", "personas pagan")}`;
+  personas.textContent = grupo.nombre
+    ? grupo.nombre
+    : `${grupo.personas} ${plural(grupo.personas, "persona paga", "personas pagan")}`;
   detalle.append(personas);
 
   // El chip solo aparece en el grupo que paga más que el monto base
@@ -257,14 +262,25 @@ function llevarResultadoALaVista() {
   }
 }
 
-function mostrarResultado(datos) {
+// Con nombres (asistente paso a paso), cada persona tiene su fila. La API dice
+// que las primeras "personas_con_extra" pagan 1 peso más, así que se asigna en ese orden.
+function crearItemsPorNombre(datos, nombres) {
+  return nombres.map((nombre, indice) => {
+    const paga = indice < datos.personas_con_extra ? datos.monto_base + 1 : datos.monto_base;
+    return crearItemDistribucion({ personas: 1, monto: paga, nombre }, datos.monto_base);
+  });
+}
+
+function mostrarResultado(datos, nombres = []) {
   resultadoEtiqueta.textContent =
     datos.personas_con_extra === 0 ? "Cada persona paga" : "Cada persona paga al menos";
   resultadoBase.textContent = formatear(datos.monto_base);
   resultadoTotal.textContent = formatear(datos.total);
   resultadoPersonas.textContent = `${datos.personas} ${plural(datos.personas, "persona", "personas")}`;
 
-  const items = datos.distribucion.map((grupo) => crearItemDistribucion(grupo, datos.monto_base));
+  const items = nombres.length === datos.personas
+    ? crearItemsPorNombre(datos, nombres)
+    : datos.distribucion.map((grupo) => crearItemDistribucion(grupo, datos.monto_base));
   distribucion.replaceChildren(...items);
 
   if (datos.personas_con_extra === 0) {
@@ -303,6 +319,13 @@ async function calcularDivision(evento) {
   };
 
   ponerCargando(true);
+  await pedirDivision(datosEnviados);
+  ponerCargando(false);
+}
+
+// Llama a la API y pinta la respuesta. La usan el formulario, el asistente
+// paso a paso y la voz (flujos.js). Devuelve los datos, o null si hubo error.
+async function pedirDivision(datosEnviados, { caja = cajaError, nombres = [] } = {}) {
   try {
     const respuesta = await fetch("/api/dividir", {
       method: "POST",
@@ -313,18 +336,19 @@ async function calcularDivision(evento) {
 
     // fetch NO lanza error con respuestas 422 o 500: por eso se revisa respuesta.ok
     if (respuesta.ok) {
-      mostrarResultado(datos);
-    } else if (datos && Array.isArray(datos.errores)) {
-      mostrarError(datos.errores);
+      mostrarResultado(datos, nombres);
+      return datos;
+    }
+    if (datos && Array.isArray(datos.errores)) {
+      mostrarError(datos.errores, caja);
     } else {
-      mostrarError([`El servidor respondió con un error inesperado (código ${respuesta.status}).`]);
+      mostrarError([`El servidor respondió con un error inesperado (código ${respuesta.status}).`], caja);
     }
   } catch (error) {
     // fetch solo lanza error cuando no hay conexión con el servidor
-    mostrarError(["No se pudo conectar con el servidor. Revisa que uvicorn esté corriendo."]);
-  } finally {
-    ponerCargando(false);
+    mostrarError(["No se pudo conectar con el servidor. Revisa que uvicorn esté corriendo."], caja);
   }
+  return null;
 }
 
 // ---------- Eventos ----------

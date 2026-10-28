@@ -9,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'%3E%3Crect width='32' height='32' rx='9' fill='%23007AFF'/%3E%3Ccircle cx='12.5' cy='16' r='5.5' fill='%23fff'/%3E%3Ccircle cx='19.5' cy='16' r='5.5' fill='%23fff' fill-opacity='.55'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
+  <script src="flujos.js" defer></script>
 </head>
 <body>
   <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -121,6 +122,21 @@
         </header>
         <div class="calculadora">
 
+          <div class="calculadora__entrada">
+
+          <!-- Controles: elegir el flujo y dictar por voz -->
+          <div class="calculadora__controles">
+            <div class="modos" role="group" aria-label="Forma de calcular">
+              <button class="modos__boton" type="button" data-modo="formulario" aria-pressed="true">Formulario</button>
+              <button class="modos__boton" type="button" data-modo="asistente" aria-pressed="false">Paso a paso</button>
+            </div>
+            <button class="boton boton--secundario boton--pequeno voz" id="boton-voz" type="button" aria-describedby="voz-estado" hidden>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              <span class="voz__texto">Dictar</span>
+            </button>
+          </div>
+          <p class="voz__estado" id="voz-estado" aria-live="polite" hidden></p>
+
           <!-- Formulario -->
           <form class="tarjeta calculadora__formulario" id="formulario" novalidate>
             <div class="campo">
@@ -145,6 +161,48 @@
               <span class="boton__texto">Calcular división</span>
             </button>
           </form>
+
+          <!-- Asistente paso a paso: el mismo cálculo, una pregunta por pantalla -->
+          <form class="tarjeta asistente" id="asistente" novalidate hidden>
+            <p class="asistente__progreso" id="asistente-progreso" aria-live="polite">Paso 1 de 3</p>
+            <div class="asistente__barra" aria-hidden="true"><span class="asistente__avance" id="asistente-avance"></span></div>
+
+            <fieldset class="asistente__paso" data-paso="1">
+              <legend class="asistente__pregunta">¿Cuánto fue la cuenta?</legend>
+              <div class="campo">
+                <label class="campo__etiqueta" for="asistente-monto">Monto total</label>
+                <div class="campo__control">
+                  <span class="campo__prefijo" aria-hidden="true">$</span>
+                  <input class="campo__entrada" type="text" id="asistente-monto" inputmode="numeric" autocomplete="off" placeholder="90.000">
+                  <span class="campo__sufijo" aria-hidden="true">COP</span>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="asistente__paso" data-paso="2" hidden>
+              <legend class="asistente__pregunta">¿Entre cuántas personas?</legend>
+              <div class="contador">
+                <button class="contador__boton" type="button" data-cambio="-1" aria-label="Una persona menos">−</button>
+                <label class="visualmente-oculto" for="asistente-personas">Número de personas</label>
+                <input class="contador__valor" type="text" id="asistente-personas" inputmode="numeric" autocomplete="off" value="2">
+                <button class="contador__boton" type="button" data-cambio="1" aria-label="Una persona más">+</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="asistente__paso" data-paso="3" hidden>
+              <legend class="asistente__pregunta">¿Quiénes son?</legend>
+              <p class="campo__ayuda">Opcional: escribe los nombres para ver cuánto paga cada quien.</p>
+              <ol class="asistente__nombres" id="asistente-nombres"></ol>
+            </fieldset>
+
+            <div class="alerta" id="asistente-error" role="alert" hidden></div>
+            <div class="asistente__acciones">
+              <button class="boton boton--secundario" id="asistente-atras" type="button" hidden>Atrás</button>
+              <button class="boton boton--primario" id="asistente-siguiente" type="submit">Siguiente</button>
+            </div>
+          </form>
+
+          </div>
 
           <!-- Resultado -->
           <section class="tarjeta resultado" aria-labelledby="resultado-titulo" aria-live="polite">

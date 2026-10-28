@@ -945,7 +945,198 @@ section[id] {
   font-size: 13px;
 }
 
+/* ---------- Flujos alternativos: modos, asistente y voz ---------- */
+.calculadora__entrada {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  min-width: 0;
+}
+
+.calculadora__controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Control segmentado estilo iOS */
+.modos {
+  display: inline-flex;
+  padding: 4px;
+  background: #E8E8ED;
+  border-radius: 999px;
+}
+
+.modos__boton {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transicion), box-shadow var(--transicion);
+}
+
+.modos__boton[aria-pressed="true"] {
+  background: var(--superficie);
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  font-weight: 600;
+}
+
+.voz--escuchando {
+  background: var(--error-fondo);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.voz--escuchando svg {
+  animation: latir 1s ease-in-out infinite;
+}
+
+.voz__estado {
+  font-size: 14px;
+  color: var(--texto-secundario);
+}
+
+.asistente__progreso {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--acento-texto);
+}
+
+.asistente__barra {
+  height: 4px;
+  margin: 8px 0 24px;
+  background: var(--borde);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.asistente__avance {
+  display: block;
+  width: 33.33%;
+  height: 100%;
+  background: var(--acento);
+  border-radius: inherit;
+  transition: width var(--transicion);
+}
+
+.asistente__paso {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  animation: aparecer 250ms ease-out both;
+}
+
+.asistente__pregunta {
+  margin-bottom: 20px;
+  padding: 0;
+  font-size: clamp(1.375rem, 2vw + 1rem, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.asistente__acciones {
+  display: flex;
+  gap: 12px;
+}
+
+.asistente__acciones .boton {
+  flex: 1;
+}
+
+.contador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.contador__boton {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--borde-campo);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--acento-texto);
+  font: inherit;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transicion);
+}
+
+.contador__boton:hover {
+  background: #EEF5FF;
+}
+
+.contador__valor {
+  width: 4ch;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.asistente__nombres {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  margin: 16px 0 20px;
+  overflow-y: auto;
+}
+
+.asistente__nombre {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  background: #FBFBFD;
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio);
+  color: var(--texto);
+  font: inherit;
+  font-size: 17px; /* 16px o más: evita el zoom automático de iOS */
+}
+
+.asistente__nombre:focus {
+  outline: none;
+  background: var(--superficie);
+  border-color: var(--acento);
+  box-shadow: 0 0 0 4px rgba(0,122,255,.15);
+}
+
+/* Texto solo para lectores de pantalla */
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ---------- Animaciones ---------- */
+@keyframes latir {
+  50% { transform: scale(1.15); }
+}
+
 @keyframes aparecer {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
