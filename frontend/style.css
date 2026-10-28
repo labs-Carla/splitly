@@ -426,14 +426,14 @@ section[id] {
 .hero {
   position: relative;
   overflow: hidden; /* recorta los garabatos que se salen de los bordes */
-  padding-block: 64px 80px;
+  padding-block: 48px 56px;
   background: var(--tinta);
   color: var(--texto-claro);
 }
 
 @media (min-width: 768px) {
   .hero {
-    padding-block: 96px 112px;
+    padding-block: 72px 80px;
   }
 }
 
@@ -455,7 +455,7 @@ section[id] {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   padding: 6px 14px;
   border: 1px solid var(--borde-oscuro);
   border-radius: 999px;
@@ -483,7 +483,7 @@ section[id] {
 
 .hero__subtitulo {
   max-width: 40ch;
-  margin: 28px 0 36px;
+  margin: 20px 0 28px;
   font-size: clamp(1.0625rem, 1vw + 0.9rem, 1.25rem);
   color: var(--texto-claro-secundario);
 }
@@ -669,18 +669,18 @@ section[id] {
 
 /* ---------- Secciones genéricas ---------- */
 .seccion {
-  padding-block: 72px;
+  padding-block: 48px;
 }
 
 @media (min-width: 768px) {
   .seccion {
-    padding-block: 112px;
+    padding-block: 72px;
   }
 }
 
 .seccion__encabezado {
   max-width: 680px;
-  margin: 0 auto 56px;
+  margin: 0 auto 36px;
   text-align: center;
 }
 
@@ -713,7 +713,7 @@ section[id] {
 }
 
 .seccion__accion {
-  margin-top: 48px;
+  margin-top: 32px;
   text-align: center;
 }
 
@@ -1090,7 +1090,7 @@ section[id] {
   display: flex;
   align-items: center;
   gap: 24px;
-  margin-top: 64px;
+  margin-top: 40px;
   padding: 28px;
   background: var(--crema);
   border: 2px solid var(--tinta);
@@ -1144,7 +1144,7 @@ section[id] {
 .footer {
   position: relative;
   overflow: hidden;
-  padding-top: 64px;
+  padding-top: 44px;
   background: var(--tinta);
   font-size: 15px;
   color: var(--texto-claro-secundario);
@@ -1202,8 +1202,8 @@ section[id] {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 24px;
-  margin-top: 48px;
-  padding-block: 24px;
+  margin-top: 32px;
+  padding-block: 20px;
   border-top: 1px solid var(--borde-oscuro);
   font-size: 13px;
 }
@@ -1213,7 +1213,60 @@ section[id] {
   color: var(--amarillo);
 }
 
+/* ---------- Comprobante mágico (magia.js) ---------- */
+/* Cursor de varita: estrella amarilla en la punta, que es donde hace clic */
+.tarjeta-ejemplo {
+  position: relative;
+  overflow: hidden; /* recorta el brillo; la sombra fucsia queda por fuera */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 28 19 13' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M4 28 19 13' stroke='%230C0C0C' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M23 1c.6 4 2.4 5.8 6.4 6.4-4 .6-5.8 2.4-6.4 6.4-.6-4-2.4-5.8-6.4-6.4 4-.6 5.8-2.4 6.4-6.4Z' fill='%23FFE600' stroke='%23FF2E93' stroke-width='1.2'/%3E%3C/svg%3E") 23 7, pointer;
+  /* "backwards": tras entrar, la animación suelta el transform y el hover puede moverlo */
+  animation-fill-mode: backwards;
+  transition:
+    transform 450ms cubic-bezier(.34,1.56,.64,1),
+    box-shadow 450ms ease;
+}
+
+/* Brillo que cruza la tarjeta */
+.tarjeta-ejemplo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,230,0,.35) 47%, rgba(255,255,255,.75) 50%, rgba(255,46,147,.25) 53%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .tarjeta-ejemplo:hover {
+    transform: rotate(-1.5deg) translateY(-8px) scale(1.02);
+    box-shadow: 16px 16px 0 var(--fucsia);
+  }
+
+  .tarjeta-ejemplo:hover::after {
+    transform: translateX(120%);
+    transition: transform 900ms ease;
+  }
+}
+
+/* Destellos que deja el cursor (los crea magia.js) */
+.chispa {
+  position: fixed;
+  z-index: 60;
+  width: var(--tamano);
+  height: var(--tamano);
+  margin: calc(var(--tamano) / -2) 0 0 calc(var(--tamano) / -2);
+  background: var(--color);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  filter: drop-shadow(0 0 1px rgba(12,12,12,.6)); /* se ven también sobre la tarjeta crema */
+  pointer-events: none;
+  animation: chispear 700ms ease-out forwards;
+}
+
 /* ---------- Animaciones ---------- */
+@keyframes chispear {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.2) rotate(180deg); }
+}
 @keyframes aparecer {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; }
