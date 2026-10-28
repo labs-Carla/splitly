@@ -1132,6 +1132,11 @@ section[id] {
   white-space: nowrap;
 }
 
+/* Créditos: los enlaces van en línea con el texto */
+.footer__creditos .footer__enlace {
+  padding: 0;
+}
+
 /* ---------- Animaciones ---------- */
 @keyframes latir {
   50% { transform: scale(1.15); }
