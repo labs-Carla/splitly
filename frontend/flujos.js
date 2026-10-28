@@ -1,17 +1,15 @@
-// Splitly: flujos alternativos de la calculadora.
+// Splitly: flujo de la calculadora en esta versión.
 //   1. Asistente paso a paso: una pregunta por pantalla (monto, personas, nombres).
-//   2. Voz: se dicta "120 mil entre 4" y la respuesta se lee en voz alta.
+//   2. Voz: se dice "120 mil entre 4" y la respuesta se lee en voz alta.
 // Usa funciones de script.js (pedirDivision, prepararValor, mostrarError...).
 // Igual que script.js, este archivo NO calcula el reparto: eso lo hace la API.
 
 // ---------- Referencias a elementos ----------
-const botonesModo = document.querySelectorAll(".modos__boton");
 const asistente = document.getElementById("asistente");
 const pasosAsistente = asistente.querySelectorAll(".asistente__paso");
 const asistenteMonto = document.getElementById("asistente-monto");
 const asistentePersonas = document.getElementById("asistente-personas");
 const asistenteNombres = document.getElementById("asistente-nombres");
-const asistenteError = document.getElementById("asistente-error");
 const asistenteProgreso = document.getElementById("asistente-progreso");
 const asistenteAvance = document.getElementById("asistente-avance");
 const botonAtras = document.getElementById("asistente-atras");
@@ -24,26 +22,8 @@ const TOTAL_PASOS = 3;
 // Con más personas, escribir un nombre por persona deja de ser práctico
 const MAXIMO_NOMBRES = 20;
 
-// ---------- Elegir flujo ----------
-function cambiarModo(modo) {
-  botonesModo.forEach((botonModo) => {
-    botonModo.setAttribute("aria-pressed", String(botonModo.dataset.modo === modo));
-  });
-  formulario.hidden = modo !== "formulario";
-  asistente.hidden = modo !== "asistente";
-}
-
-botonesModo.forEach((botonModo) => {
-  botonModo.addEventListener("click", () => cambiarModo(botonModo.dataset.modo));
-});
-
 // ---------- Asistente paso a paso ----------
 let pasoActual = 1;
-
-function ocultarErrorAsistente() {
-  asistenteError.hidden = true;
-  asistenteError.replaceChildren();
-}
 
 function irAlPaso(numero) {
   pasoActual = numero;
@@ -54,7 +34,7 @@ function irAlPaso(numero) {
   asistenteAvance.style.width = `${(numero / TOTAL_PASOS) * 100}%`;
   botonAtras.hidden = numero === 1;
   botonSiguiente.textContent = numero === TOTAL_PASOS ? "Ver resultado" : "Siguiente";
-  ocultarErrorAsistente();
+  ocultarError();
 
   // El foco pasa al primer campo del paso nuevo, para seguir sin usar el mouse
   const primerCampo = asistente.querySelector(`[data-paso="${numero}"] input`);
@@ -93,14 +73,27 @@ function leerNombres() {
   );
 }
 
+// Mientras espera a la API, el botón principal no se puede volver a pulsar
+async function calcular(datosEnviados, nombres = []) {
+  const textoAnterior = botonSiguiente.textContent;
+  botonSiguiente.disabled = true;
+  botonSiguiente.setAttribute("aria-busy", "true");
+  botonSiguiente.textContent = "Calculando…";
+  const datos = await pedirDivision(datosEnviados, nombres);
+  botonSiguiente.disabled = false;
+  botonSiguiente.removeAttribute("aria-busy");
+  botonSiguiente.textContent = textoAnterior;
+  return datos;
+}
+
 async function avanzarAsistente(evento) {
   evento.preventDefault();
-  ocultarErrorAsistente();
+  ocultarError();
 
   // Ayuda de interfaz (no es una regla de negocio): no avanzar con el campo vacío
   if (pasoActual === 1) {
     if (asistenteMonto.value.trim() === "") {
-      mostrarError(["Escribe cuánto fue la cuenta."], asistenteError);
+      mostrarError(["Escribe cuánto fue la cuenta o díctalo en voz alta."]);
       asistenteMonto.focus();
       return;
     }
@@ -110,7 +103,7 @@ async function avanzarAsistente(evento) {
 
   if (pasoActual === 2) {
     if (asistentePersonas.value.trim() === "") {
-      mostrarError(["Escribe entre cuántas personas se divide."], asistenteError);
+      mostrarError(["Escribe entre cuántas personas se divide."]);
       asistentePersonas.focus();
       return;
     }
@@ -127,11 +120,7 @@ async function avanzarAsistente(evento) {
     monto: prepararValor(asistenteMonto.value),
     personas: prepararValor(asistentePersonas.value)
   };
-  const nombres = pasoActual === 3 ? leerNombres() : [];
-
-  botonSiguiente.disabled = true;
-  await pedirDivision(datosEnviados, { caja: asistenteError, nombres });
-  botonSiguiente.disabled = false;
+  await calcular(datosEnviados, pasoActual === 3 ? leerNombres() : []);
 }
 
 // Botones − y + del paso 2
@@ -142,21 +131,21 @@ function cambiarPersonas(evento) {
   }
   const actual = prepararValor(asistentePersonas.value);
   const base = Number.isInteger(actual) ? actual : 1;
-  // Límites del control (1 a 100), igual que la ayuda del formulario
+  // Límites del control (1 a 100), los mismos que acepta la API
   asistentePersonas.value = String(Math.min(100, Math.max(1, base + Number(boton.dataset.cambio))));
-  ocultarErrorAsistente();
+  ocultarError();
 }
 
 asistente.addEventListener("submit", avanzarAsistente);
 asistente.addEventListener("click", cambiarPersonas);
 botonAtras.addEventListener("click", () => irAlPaso(pasoActual - 1));
 asistenteMonto.addEventListener("input", formatearMientrasEscribe);
-asistenteMonto.addEventListener("input", ocultarErrorAsistente);
-asistentePersonas.addEventListener("input", ocultarErrorAsistente);
+asistenteMonto.addEventListener("input", ocultarError);
+asistentePersonas.addEventListener("input", ocultarError);
 
 // ---------- Voz ----------
-// Web Speech API: viene en Chrome y Edge, sin claves ni costo. En Firefox no
-// existe, así que el botón queda oculto y el resto de la página funciona igual.
+// Web Speech API: viene en Chrome y Edge, sin claves ni costo. Firefox no la
+// trae; ahí el botón explica que hay que abrir la página en otro navegador.
 const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // Traduce frases como "120 mil", "$120.000" o "ciento veinte mil" a número.
@@ -246,7 +235,7 @@ function mostrarEstadoVoz(texto) {
 const MENSAJES_VOZ = {
   "not-allowed": "Necesito permiso para usar el micrófono.",
   "service-not-allowed": "Necesito permiso para usar el micrófono.",
-  "no-speech": "No te escuché. Toca «Dictar» e intenta de nuevo.",
+  "no-speech": "No te escuché. Toca «Dilo en voz alta» e intenta de nuevo.",
   "audio-capture": "No encontré un micrófono en este equipo.",
   network: "El dictado necesita conexión a internet.",
   aborted: ""
@@ -259,17 +248,13 @@ async function procesarFrase(frase) {
     return;
   }
 
-  // El resultado se muestra en el formulario, con los campos llenos para poder corregirlos
-  cambiarModo("formulario");
-  campoMonto.value = datosEnviados.monto.toLocaleString("es-CO");
-  campoPersonas.value = String(datosEnviados.personas);
+  // Los campos del asistente quedan llenos, por si se quiere corregir algo
+  asistenteMonto.value = datosEnviados.monto.toLocaleString("es-CO");
+  asistentePersonas.value = String(datosEnviados.personas);
   ocultarError();
   mostrarEstadoVoz(`Escuché «${frase}».`);
 
-  ponerCargando(true);
-  const datos = await pedirDivision(datosEnviados);
-  ponerCargando(false);
-
+  const datos = await calcular(datosEnviados);
   hablar(datos ? textoParaLeer(datos) : "No pude calcularlo. Revisa el mensaje en pantalla.");
 }
 
@@ -277,12 +262,17 @@ let reconocimiento = null;
 
 function terminarEscucha() {
   reconocimiento = null;
-  botonVoz.classList.remove("voz--escuchando");
+  botonVoz.classList.remove("voz__boton--escuchando");
   botonVoz.setAttribute("aria-pressed", "false");
-  textoVoz.textContent = "Dictar";
+  textoVoz.textContent = "Dilo en voz alta";
 }
 
 function alternarEscucha() {
+  if (!Reconocimiento) {
+    mostrarEstadoVoz("Este navegador no permite dictar. Abre Splitly en Chrome o Edge para usar la voz.");
+    return;
+  }
+
   // Segundo clic mientras escucha: se detiene
   if (reconocimiento) {
     reconocimiento.stop();
@@ -302,14 +292,13 @@ function alternarEscucha() {
   reconocimiento.addEventListener("end", terminarEscucha);
 
   reconocimiento.start();
-  botonVoz.classList.add("voz--escuchando");
+  botonVoz.classList.add("voz__boton--escuchando");
   botonVoz.setAttribute("aria-pressed", "true");
-  textoVoz.textContent = "Escuchando…";
+  textoVoz.textContent = "Escuchando… toca para parar";
   mostrarEstadoVoz("Te escucho. Di, por ejemplo: «120 mil entre 4».");
 }
 
 if (Reconocimiento) {
-  botonVoz.hidden = false;
   botonVoz.setAttribute("aria-pressed", "false");
-  botonVoz.addEventListener("click", alternarEscucha);
 }
+botonVoz.addEventListener("click", alternarEscucha);

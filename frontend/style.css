@@ -945,7 +945,7 @@ section[id] {
   font-size: 13px;
 }
 
-/* ---------- Flujos alternativos: modos, asistente y voz ---------- */
+/* ---------- Asistente paso a paso y voz ---------- */
 .calculadora__entrada {
   display: grid;
   gap: 16px;
@@ -953,55 +953,54 @@ section[id] {
   min-width: 0;
 }
 
-.calculadora__controles {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+/* Atajo por voz dentro del primer paso */
+.voz {
+  display: grid;
   gap: 12px;
 }
 
-/* Control segmentado estilo iOS */
-.modos {
-  display: inline-flex;
-  padding: 4px;
-  background: #E8E8ED;
-  border-radius: 999px;
+.voz__separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--texto-secundario);
 }
 
-.modos__boton {
-  min-height: 36px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--texto);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color var(--transicion), box-shadow var(--transicion);
+.voz__separador::before,
+.voz__separador::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--borde);
 }
 
-.modos__boton[aria-pressed="true"] {
-  background: var(--superficie);
-  box-shadow: 0 1px 3px rgba(0,0,0,.12);
-  font-weight: 600;
+.voz__ejemplo {
+  font-size: 13px;
+  text-align: center;
+  color: var(--texto-secundario);
 }
 
-.voz--escuchando {
+.voz__boton--escuchando {
   background: var(--error-fondo);
   border-color: var(--error);
   color: var(--error);
 }
 
-.voz--escuchando svg {
+.voz__boton--escuchando:hover {
+  background: var(--error-fondo);
+}
+
+.voz__boton--escuchando svg {
   animation: latir 1s ease-in-out infinite;
 }
 
 .voz__estado {
+  padding: 10px 14px;
+  background: var(--fondo);
+  border-radius: var(--radio-sm);
   font-size: 14px;
-  color: var(--texto-secundario);
+  color: var(--texto);
 }
 
 .asistente__progreso {
@@ -1047,6 +1046,7 @@ section[id] {
 .asistente__acciones {
   display: flex;
   gap: 12px;
+  margin-top: 24px;
 }
 
 .asistente__acciones .boton {

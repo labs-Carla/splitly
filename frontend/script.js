@@ -1,4 +1,5 @@
-// Splitly: JavaScript de la landing y la calculadora.
+// Splitly: JavaScript de la landing y piezas compartidas de la calculadora
+// (formato, errores, llamada a la API y resultado). Los flujos están en flujos.js.
 // Regla de oro: este archivo NO calcula el reparto. Solo recoge datos,
 // llama a la API (/api/dividir) y pinta lo que responde.
 
@@ -6,12 +7,7 @@
 const navbar = document.querySelector(".navbar");
 const botonMenu = document.getElementById("menu-toggle");
 const menu = document.getElementById("menu");
-const formulario = document.getElementById("formulario");
-const campoMonto = document.getElementById("monto");
-const campoPersonas = document.getElementById("personas");
 const cajaError = document.getElementById("error");
-const boton = document.getElementById("boton-calcular");
-const textoBoton = boton.querySelector(".boton__texto");
 const tarjetaResultado = document.querySelector(".resultado");
 const resultadoVacio = document.getElementById("resultado-vacio");
 const resultado = document.getElementById("resultado");
@@ -178,17 +174,16 @@ function prepararValor(texto) {
 }
 
 // ---------- Errores ----------
-// "caja" permite que el asistente paso a paso muestre los errores en su propia alerta
-function mostrarError(mensajes, caja = cajaError) {
+function mostrarError(mensajes) {
   const parrafos = mensajes.map((mensaje) => {
     const parrafo = document.createElement("p");
     parrafo.textContent = mensaje;
     return parrafo;
   });
-  caja.replaceChildren(...parrafos);
-  caja.hidden = false;
+  cajaError.replaceChildren(...parrafos);
+  cajaError.hidden = false;
 
-  // Se oculta el resultado viejo: ya no corresponde a lo que hay en el formulario
+  // Se oculta el resultado viejo: ya no corresponde a lo que se escribió
   resultado.hidden = true;
   resultadoVacio.hidden = false;
 }
@@ -196,17 +191,6 @@ function mostrarError(mensajes, caja = cajaError) {
 function ocultarError() {
   cajaError.hidden = true;
   cajaError.replaceChildren();
-}
-
-// ---------- Estado de carga ----------
-function ponerCargando(activo) {
-  boton.disabled = activo;
-  if (activo) {
-    boton.setAttribute("aria-busy", "true");
-  } else {
-    boton.removeAttribute("aria-busy");
-  }
-  textoBoton.textContent = activo ? "Calculando…" : "Calcular división";
 }
 
 // ---------- Pintar el resultado ----------
@@ -301,31 +285,9 @@ function mostrarResultado(datos, nombres = []) {
 }
 
 // ---------- Comunicación con la API ----------
-async function calcularDivision(evento) {
-  evento.preventDefault();
-  ocultarError();
-
-  // Ayuda de interfaz (no es una regla de negocio): campos vacíos
-  const campoVacio = [campoMonto, campoPersonas].find((campo) => campo.value.trim() === "");
-  if (campoVacio) {
-    mostrarError(["Completa los dos campos para calcular."]);
-    campoVacio.focus();
-    return;
-  }
-
-  const datosEnviados = {
-    monto: prepararValor(campoMonto.value),
-    personas: prepararValor(campoPersonas.value)
-  };
-
-  ponerCargando(true);
-  await pedirDivision(datosEnviados);
-  ponerCargando(false);
-}
-
-// Llama a la API y pinta la respuesta. La usan el formulario, el asistente
-// paso a paso y la voz (flujos.js). Devuelve los datos, o null si hubo error.
-async function pedirDivision(datosEnviados, { caja = cajaError, nombres = [] } = {}) {
+// Llama a la API y pinta la respuesta. La usan el asistente paso a paso y la
+// voz (flujos.js). Devuelve los datos, o null si hubo error.
+async function pedirDivision(datosEnviados, nombres = []) {
   try {
     const respuesta = await fetch("/api/dividir", {
       method: "POST",
@@ -340,19 +302,13 @@ async function pedirDivision(datosEnviados, { caja = cajaError, nombres = [] } =
       return datos;
     }
     if (datos && Array.isArray(datos.errores)) {
-      mostrarError(datos.errores, caja);
+      mostrarError(datos.errores);
     } else {
-      mostrarError([`El servidor respondió con un error inesperado (código ${respuesta.status}).`], caja);
+      mostrarError([`El servidor respondió con un error inesperado (código ${respuesta.status}).`]);
     }
   } catch (error) {
     // fetch solo lanza error cuando no hay conexión con el servidor
-    mostrarError(["No se pudo conectar con el servidor. Revisa que uvicorn esté corriendo."], caja);
+    mostrarError(["No se pudo conectar con el servidor. Revisa que uvicorn esté corriendo."]);
   }
   return null;
 }
-
-// ---------- Eventos ----------
-formulario.addEventListener("submit", calcularDivision);
-campoMonto.addEventListener("input", formatearMientrasEscribe);
-campoMonto.addEventListener("input", ocultarError);
-campoPersonas.addEventListener("input", ocultarError);

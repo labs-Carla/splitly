@@ -118,52 +118,14 @@
         <header class="seccion__encabezado">
           <p class="eyebrow">Calculadora</p>
           <h2 class="seccion__titulo" id="calculadora-titulo">Divide un gasto ahora.</h2>
-          <p class="seccion__descripcion">Escribe el total y cuántas personas comparten. Splitly hace el resto.</p>
+          <p class="seccion__descripcion">Responde tres preguntas cortas o díselo a Splitly en voz alta.</p>
         </header>
         <div class="calculadora">
 
           <div class="calculadora__entrada">
 
-          <!-- Controles: elegir el flujo y dictar por voz -->
-          <div class="calculadora__controles">
-            <div class="modos" role="group" aria-label="Forma de calcular">
-              <button class="modos__boton" type="button" data-modo="formulario" aria-pressed="true">Formulario</button>
-              <button class="modos__boton" type="button" data-modo="asistente" aria-pressed="false">Paso a paso</button>
-            </div>
-            <button class="boton boton--secundario boton--pequeno voz" id="boton-voz" type="button" aria-describedby="voz-estado" hidden>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-              <span class="voz__texto">Dictar</span>
-            </button>
-          </div>
-          <p class="voz__estado" id="voz-estado" aria-live="polite" hidden></p>
-
-          <!-- Formulario -->
-          <form class="tarjeta calculadora__formulario" id="formulario" novalidate>
-            <div class="campo">
-              <label class="campo__etiqueta" for="monto">Monto total</label>
-              <div class="campo__control">
-                <span class="campo__prefijo" aria-hidden="true">$</span>
-                <input class="campo__entrada" type="text" id="monto" name="monto" inputmode="numeric" autocomplete="off" placeholder="90.000" aria-describedby="ayuda-monto">
-                <span class="campo__sufijo" aria-hidden="true">COP</span>
-              </div>
-              <p class="campo__ayuda" id="ayuda-monto">Valor en pesos colombianos, sin centavos.</p>
-            </div>
-            <div class="campo">
-              <label class="campo__etiqueta" for="personas">Número de personas</label>
-              <div class="campo__control">
-                <input class="campo__entrada" type="text" id="personas" name="personas" inputmode="numeric" autocomplete="off" placeholder="3" aria-describedby="ayuda-personas">
-              </div>
-              <p class="campo__ayuda" id="ayuda-personas">Entre 1 y 100 personas.</p>
-            </div>
-            <div class="alerta" id="error" role="alert" hidden></div>
-            <button class="boton boton--primario boton--bloque" id="boton-calcular" type="submit">
-              <span class="boton__spinner" aria-hidden="true"></span>
-              <span class="boton__texto">Calcular división</span>
-            </button>
-          </form>
-
-          <!-- Asistente paso a paso: el mismo cálculo, una pregunta por pantalla -->
-          <form class="tarjeta asistente" id="asistente" novalidate hidden>
+          <!-- Asistente paso a paso: una pregunta por pantalla, o todo de una vez por voz -->
+          <form class="tarjeta asistente" id="asistente" novalidate>
             <p class="asistente__progreso" id="asistente-progreso" aria-live="polite">Paso 1 de 3</p>
             <div class="asistente__barra" aria-hidden="true"><span class="asistente__avance" id="asistente-avance"></span></div>
 
@@ -176,6 +138,15 @@
                   <input class="campo__entrada" type="text" id="asistente-monto" inputmode="numeric" autocomplete="off" placeholder="90.000">
                   <span class="campo__sufijo" aria-hidden="true">COP</span>
                 </div>
+              </div>
+              <div class="voz">
+                <p class="voz__separador"><span>o</span></p>
+                <button class="boton boton--secundario boton--bloque voz__boton" id="boton-voz" type="button" aria-describedby="voz-ejemplo voz-estado">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+                  <span class="voz__texto">Dilo en voz alta</span>
+                </button>
+                <p class="voz__ejemplo" id="voz-ejemplo">Por ejemplo: «120 mil entre 4». Splitly te responde hablando.</p>
+                <p class="voz__estado" id="voz-estado" aria-live="polite" hidden></p>
               </div>
             </fieldset>
 
@@ -195,7 +166,7 @@
               <ol class="asistente__nombres" id="asistente-nombres"></ol>
             </fieldset>
 
-            <div class="alerta" id="asistente-error" role="alert" hidden></div>
+            <div class="alerta" id="error" role="alert" hidden></div>
             <div class="asistente__acciones">
               <button class="boton boton--secundario" id="asistente-atras" type="button" hidden>Atrás</button>
               <button class="boton boton--primario" id="asistente-siguiente" type="submit">Siguiente</button>
@@ -251,7 +222,7 @@
           <li class="paso">
             <span class="paso__numero" aria-hidden="true">03</span>
             <h3 class="paso__titulo">Obtén el resultado.</h3>
-            <p class="paso__texto">Splitly calcula cuánto corresponde pagar.</p>
+            <p class="paso__texto">Si quieres, escribe los nombres y Splitly te dice cuánto paga cada quien.</p>
           </li>
         </ol>
         <div class="seccion__accion">

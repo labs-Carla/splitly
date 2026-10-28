@@ -12,8 +12,8 @@ Splitly es una página de aterrizaje con una calculadora integrada. El frontend 
 ## Funcionalidades
 
 - Calculadora conectada a la API: el navegador envía el monto y el número de personas, y pinta lo que responde el servidor.
-- Dos flujos para el mismo cálculo: formulario en una sola pantalla o asistente paso a paso (monto, personas y nombres opcionales), que muestra cuánto paga cada persona por su nombre.
-- Dictado por voz con la Web Speech API del navegador: se dice «120 mil entre 4» y Splitly lee el resultado en voz alta. Funciona en Chrome y Edge, sin claves ni servicios pagos; en otros navegadores el botón no aparece.
+- Asistente paso a paso en lugar del formulario de la v2: una pregunta por pantalla (monto, personas y nombres opcionales), y el resultado muestra cuánto paga cada persona por su nombre.
+- Dictado por voz con la Web Speech API del navegador: se dice «120 mil entre 4» y Splitly lee el resultado en voz alta. Funciona en Chrome y Edge, sin claves ni servicios pagos; en Firefox el botón explica que hay que usar otro navegador.
 - Reparto exacto con distribución de sobrantes: la suma de lo que paga cada persona siempre es igual al total.
 - Mensajes de error en español, tanto de la API como de la interfaz.
 - Formato de moneda COP (por ejemplo, `$ 3.334`) y separador de miles mientras se escribe el monto.
