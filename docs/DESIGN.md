@@ -42,4 +42,4 @@ Contrast rules: yellow and fuchsia text only on ink. On light backgrounds use in
 ## Layout
 - Generous whitespace, left-aligned editorial text, max content width 1120px.
 - Mobile first, works from 320px.
-- Footer credit style: small centered "Hecho por Carla Valderrama (@labs-Carla) y Sonia Cano G. (@DreamHunterG)", each GitHub handle linking to its profile. Never credit only one author.
+- Footer credit style: small centered "Creado por Carla Valderrama (@labs-Carla) y Sonia Cano G. (@DreamHunterG)", each GitHub handle linking to its profile. Never credit only one author.

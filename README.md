@@ -218,7 +218,7 @@ Ninguna de estas ideas está implementada.
 
 Proyecto desarrollado en el taller práctico Reto Full Stack SENA, con apoyo de IA como asistente de programación.
 
-Hecho por:
+Creado por:
 
 - **Carla Valderrama** · [@labs-Carla](https://github.com/labs-Carla)
 - **Sonia Cano G.** · [@DreamHunterG](https://github.com/DreamHunterG)

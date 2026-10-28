@@ -426,14 +426,14 @@ section[id] {
 .hero {
   position: relative;
   overflow: hidden; /* recorta los garabatos que se salen de los bordes */
-  padding-block: 48px 56px;
+  padding-block: 40px 48px;
   background: var(--tinta);
   color: var(--texto-claro);
 }
 
 @media (min-width: 768px) {
   .hero {
-    padding-block: 72px 80px;
+    padding-block: 56px 64px;
   }
 }
 
@@ -669,18 +669,18 @@ section[id] {
 
 /* ---------- Secciones genéricas ---------- */
 .seccion {
-  padding-block: 48px;
+  padding-block: 32px;
 }
 
 @media (min-width: 768px) {
   .seccion {
-    padding-block: 72px;
+    padding-block: 48px;
   }
 }
 
 .seccion__encabezado {
   max-width: 680px;
-  margin: 0 auto 36px;
+  margin: 0 auto 28px;
   text-align: center;
 }
 
@@ -713,7 +713,7 @@ section[id] {
 }
 
 .seccion__accion {
-  margin-top: 32px;
+  margin-top: 28px;
   text-align: center;
 }
 
@@ -1090,7 +1090,7 @@ section[id] {
   display: flex;
   align-items: center;
   gap: 24px;
-  margin-top: 40px;
+  margin-top: 32px;
   padding: 28px;
   background: var(--crema);
   border: 2px solid var(--tinta);
