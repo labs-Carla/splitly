@@ -213,7 +213,6 @@ Ninguna de estas ideas está implementada.
 
 - Pruebas automatizadas con pytest y `TestClient` de FastAPI.
 - Dividir por porcentajes o con montos distintos por persona.
-- Nombres de participantes en el reparto.
 - Compartir el resultado.
 - Modo oscuro.
 
