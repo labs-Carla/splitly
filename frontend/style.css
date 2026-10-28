@@ -945,6 +945,11 @@ section[id] {
   font-size: 13px;
 }
 
+/* Créditos: los enlaces van en línea con el texto */
+.footer__creditos .footer__enlace {
+  padding: 0;
+}
+
 /* ---------- Animaciones ---------- */
 @keyframes aparecer {
   from { opacity: 0; transform: translateY(8px); }
