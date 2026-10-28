@@ -27,7 +27,7 @@ Splitly es una página de aterrizaje con una calculadora integrada. El frontend 
 | Frontend | HTML5 semántico, CSS3 (variables, grid, `clamp()`, `:focus-within`, `backdrop-filter`), JavaScript vanilla con Fetch API |
 | Backend | Python 3, FastAPI, Pydantic, Uvicorn |
 
-El proyecto no usa base de datos, ni frameworks de frontend, ni dependencias externas en el navegador.
+El proyecto no usa base de datos ni frameworks de frontend. La única dependencia externa en el navegador son las fuentes Playfair Display y Open Sans, que se cargan desde Google Fonts. El sistema de diseño está documentado en `docs/DESIGN.md` y se creó con Stitch.
 
 ## Arquitectura
 
