@@ -362,14 +362,14 @@ section[id] {
 
 /* ---------- Hero ---------- */
 .hero {
-  padding-block: 40px 48px;
+  padding-block: 32px 40px;
   background: var(--superficie);
   border-bottom: 1px solid var(--borde);
 }
 
 @media (min-width: 768px) {
   .hero {
-    padding-block: 56px 64px;
+    padding-block: 48px 56px;
   }
 }
 
@@ -538,18 +538,18 @@ section[id] {
 
 /* ---------- Secciones genéricas ---------- */
 .seccion {
-  padding-block: 48px;
+  padding-block: 32px;
 }
 
 @media (min-width: 768px) {
   .seccion {
-    padding-block: 72px;
+    padding-block: 48px;
   }
 }
 
 .seccion__encabezado {
   max-width: 640px;
-  margin: 0 auto 32px;
+  margin: 0 auto 28px;
   text-align: center;
 }
 
@@ -567,7 +567,7 @@ section[id] {
 }
 
 .seccion__accion {
-  margin-top: 32px;
+  margin-top: 28px;
   text-align: center;
 }
 
